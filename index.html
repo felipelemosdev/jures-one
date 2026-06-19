@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jures One | CRM Jurídico V 0.1</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="app" class="app-shell">
+        <section id="loginView" class="login-view" aria-labelledby="loginTitle">
+            <div class="login-brand">
+                <div class="brand-mark" aria-hidden="true">JO</div>
+                <div>
+                    <p class="eyebrow">CRM jurídico</p>
+                    <h1 id="loginTitle">Jures One</h1>
+                </div>
+            </div>
+
+            <form id="loginForm" class="login-panel" autocomplete="on">
+                <div>
+                    <h2>Acesse sua área</h2>
+                    <p>Gestão de clientes, processos judiciais, agenda e financeiro em um único fluxo.</p>
+                </div>
+
+                <label class="field">
+                    <span>Login de usuário</span>
+                    <input id="loginUser" type="text" placeholder="usuario.escritorio" autocomplete="username" required>
+                </label>
+
+                <label class="field">
+                    <span>Senha</span>
+                    <input id="loginPassword" type="password" placeholder="Digite sua senha" minlength="4" required>
+                </label>
+
+                <button class="btn btn-primary" type="submit">Entrar</button>
+                <p id="loginMessage" class="form-message" role="status"></p>
+                <div class="login-meta">
+                    <div class="clock-stack">
+                        <span class="date-chip date-display"></span>
+                        <span class="credit-chip">Feito por Felipe Lemos - 2026</span>
+                    </div>
+                </div>
+            </form>
+        </section>
+
+        <section id="systemView" class="system-view hidden" aria-label="Sistema Jures One">
+            <aside class="sidebar">
+                <div class="sidebar-brand">
+                    <div class="brand-mark" aria-hidden="true">JO</div>
+                    <div>
+                        <strong>Jures One</strong>
+                        <span>CRM Jurídico</span>
+                    </div>
+                </div>
+
+                <nav class="sidebar-nav" aria-label="Menu principal">
+                    <button class="nav-link active" type="button" data-view="dashboard">
+                        <span class="nav-icon" aria-hidden="true">▦</span>
+                        Dashboard
+                    </button>
+                    <button class="nav-link" type="button" data-view="clients">
+                        <span class="nav-icon" aria-hidden="true">◇</span>
+                        Clientes
+                    </button>
+                    <button class="nav-link" type="button" data-view="documents">
+                        <span class="nav-icon" aria-hidden="true">§</span>
+                        Processos
+                    </button>
+                    <button class="nav-link" type="button" data-view="finance">
+                        <span class="nav-icon" aria-hidden="true">R$</span>
+                        Financeiro
+                    </button>
+                </nav>
+
+                <button id="logoutButton" class="btn btn-secondary sidebar-logout" type="button">Sair</button>
+            </aside>
+
+            <main class="main-area">
+                <header class="topbar">
+                    <div>
+                        <p class="eyebrow">Escritório jurídico</p>
+                        <h2 id="pageTitle">Dashboard</h2>
+                    </div>
+                    <div class="topbar-actions">
+                        <div class="clock-stack">
+                            <span id="currentDate" class="date-chip date-display"></span>
+                            <span class="credit-chip">Feito por Felipe Lemos - 2026</span>
+                        </div>
+                        <button id="mobileMenuButton" class="icon-button" type="button" aria-label="Abrir menu">☰</button>
+                    </div>
+                </header>
+
+                <section id="dashboardSection" class="content-section active-section">
+                    <div class="summary-grid dashboard-summary">
+                        <article class="summary-card">
+                            <span>Calendário</span>
+                            <strong id="calendarToday">Hoje</strong>
+                            <p id="calendarNextEvent">Nenhum evento para hoje.</p>
+                        </article>
+                        <article class="summary-card">
+                            <span>Eventos</span>
+                            <strong id="eventCount">0</strong>
+                            <p id="eventAlertCount">Nenhum alerta ativo.</p>
+                        </article>
+                    </div>
+
+                    <div class="dashboard-grid">
+                        <section class="workspace-panel">
+                            <div class="section-heading">
+                                <div>
+                                    <p class="eyebrow">Agenda</p>
+                                    <h3>Cadastrar evento</h3>
+                                </div>
+                            </div>
+
+                            <form id="eventForm" class="form-grid">
+                                <label class="field">
+                                    <span>Tipo de evento</span>
+                                    <select id="eventType" required>
+                                        <option value="Avaliação social">Avaliação social</option>
+                                        <option value="Perícia médica">Perícia médica</option>
+                                        <option value="Perícia judicial">Perícia judicial</option>
+                                        <option value="Reunião">Reunião</option>
+                                        <option value="Agendamento">Agendamento</option>
+                                        <option value="Outros">Outros</option>
+                                    </select>
+                                </label>
+
+                                <label class="field">
+                                    <span>Data</span>
+                                    <input id="eventDate" type="date" required>
+                                </label>
+
+                                <label class="field">
+                                    <span>Horário</span>
+                                    <input id="eventTime" type="time" required>
+                                </label>
+
+                                <label class="field">
+                                    <span>Cliente</span>
+                                    <select id="eventClient">
+                                        <option value="">Sem cliente vinculado</option>
+                                    </select>
+                                </label>
+
+                                <label class="field">
+                                    <span>Alerta</span>
+                                    <select id="eventAlert" required>
+                                        <option value="No horário">No horário</option>
+                                        <option value="1 dia antes">1 dia antes</option>
+                                        <option value="3 dias antes">3 dias antes</option>
+                                        <option value="7 dias antes">7 dias antes</option>
+                                    </select>
+                                </label>
+
+                                <label class="field full-width">
+                                    <span>Obs. curta</span>
+                                    <input id="eventNotes" type="text" maxlength="90" placeholder="Resumo curto para aparecer na agenda">
+                                </label>
+
+                                <div class="form-actions full-width">
+                                    <button id="cancelEventEdit" class="btn btn-ghost hidden" type="button">Cancelar edição</button>
+                                    <button id="saveEventButton" class="btn btn-primary" type="submit">Salvar evento</button>
+                                </div>
+                            </form>
+                        </section>
+
+                        <section class="workspace-panel">
+                            <div class="section-heading">
+                                <div>
+                                    <p class="eyebrow">Eventos</p>
+                                    <h3>Agenda cadastrada</h3>
+                                </div>
+                            </div>
+                            <label class="search-field">
+                                <span class="sr-only">Pesquisar eventos</span>
+                                <input id="eventSearch" type="search" placeholder="Pesquisar por cadastramento, cliente, data ou alerta">
+                            </label>
+                            <div id="eventList" class="compact-list empty-state">Nenhum evento cadastrado.</div>
+                        </section>
+                    </div>
+                </section>
+
+                <section id="clientsSection" class="content-section">
+                    <div class="client-page">
+                        <div class="client-toolbar">
+                            <button id="showClientRegister" class="btn btn-primary" type="button">Cadastro de cliente</button>
+                            <button id="showClientList" class="btn btn-ghost" type="button">Clientes cadastrados</button>
+                        </div>
+
+                        <form id="clientForm" class="workspace-panel form-grid">
+                            <div class="section-heading full-width">
+                                <div>
+                                    <p class="eyebrow">Cadastro</p>
+                                    <h3 id="clientFormTitle">Novo cliente</h3>
+                                </div>
+                                <button id="cancelClientEdit" class="btn btn-ghost hidden" type="button">Cancelar edição</button>
+                            </div>
+
+                            <input id="clientId" type="hidden">
+
+                            <div class="photo-field full-width">
+                                <div class="photo-preview" aria-hidden="true">
+                                    <img id="clientPhotoPreview" class="hidden" alt="">
+                                    <span id="clientPhotoPlaceholder">3x4</span>
+                                </div>
+                                <label class="field">
+                                    <span>Foto 3x4</span>
+                                    <input id="clientPhoto" type="file" accept="image/jpeg,image/png,.jpg,.jpeg,.png">
+                                </label>
+                            </div>
+
+                            <label class="field">
+                                <span>Nome completo</span>
+                                <input id="clientName" type="text" placeholder="Nome do cliente" required>
+                            </label>
+
+                            <label class="field">
+                                <span>Email</span>
+                                <input id="clientEmail" type="email" placeholder="cliente@email.com" required>
+                            </label>
+
+                            <label class="field">
+                                <span>Telefone</span>
+                                <input id="clientPhone" type="tel" placeholder="(00) 00000-0000" required>
+                            </label>
+
+                            <label class="field">
+                                <span>Senha INSS</span>
+                                <input id="clientInssPassword" type="text" placeholder="Senha de acesso do INSS">
+                            </label>
+
+                            <label class="field">
+                                <span>CPF</span>
+                                <input id="clientDocument" type="text" inputmode="numeric" maxlength="14" placeholder="000.000.000-00" required>
+                                <small id="clientCpfMessage" class="validation-message"></small>
+                            </label>
+
+                            <label class="field">
+                                <span>CEP</span>
+                                <input id="clientCep" type="text" inputmode="numeric" maxlength="9" placeholder="00000-000" required>
+                                <small id="clientCepMessage" class="validation-message"></small>
+                            </label>
+
+                            <label class="field">
+                                <span>Rua</span>
+                                <input id="clientStreet" type="text" placeholder="Nome da rua" required>
+                            </label>
+
+                            <label class="field">
+                                <span>Número</span>
+                                <input id="clientNumber" type="text" placeholder="Número">
+                            </label>
+
+                            <label class="field">
+                                <span>Bairro</span>
+                                <input id="clientDistrict" type="text" placeholder="Bairro" required>
+                            </label>
+
+                            <label class="field">
+                                <span>Cidade</span>
+                                <input id="clientCity" type="text" placeholder="Cidade" required>
+                            </label>
+
+                            <label class="field">
+                                <span>Estado</span>
+                                <input id="clientState" type="text" maxlength="2" placeholder="UF" required>
+                            </label>
+
+                            <label class="field">
+                                <span>Complemento</span>
+                                <input id="clientComplement" type="text" placeholder="Sala, bloco ou referência">
+                            </label>
+
+                            <label class="field">
+                                <span>Área jurídica</span>
+                                <select id="clientArea" required>
+                                    <option value="">Selecione</option>
+                                    <option value="Cível">Cível</option>
+                                    <option value="Trabalhista">Trabalhista</option>
+                                    <option value="Família">Família</option>
+                                    <option value="Empresarial">Empresarial</option>
+                                    <option value="Tributário">Tributário</option>
+                                    <option value="Previdenciário">Previdenciário</option>
+                                </select>
+                            </label>
+
+                            <label class="field">
+                                <span>Status</span>
+                                <select id="clientStatus" required>
+                                    <option value="Ativo">Ativo</option>
+                                    <option value="Em análise">Em análise</option>
+                                    <option value="Arquivado">Arquivado</option>
+                                </select>
+                            </label>
+
+                            <label class="field full-width">
+                                <span>Anexar arquivo PDF</span>
+                                <input id="clientPdf" type="file" accept=".pdf,application/pdf">
+                            </label>
+
+                            <label class="field full-width">
+                                <span>Observações</span>
+                                <textarea id="clientNotes" rows="4" placeholder="Resumo do caso, próximos passos ou informações relevantes"></textarea>
+                            </label>
+
+                            <button class="btn btn-primary full-width" type="submit">Salvar cliente</button>
+                        </form>
+
+                        <section id="registeredClientsPanel" class="workspace-panel registered-clients-panel">
+                            <div class="section-heading">
+                                <div>
+                                    <p class="eyebrow">Clientes já cadastrados</p>
+                                    <h3>Lista de clientes</h3>
+                                </div>
+                            </div>
+
+                            <label class="search-field">
+                                <span class="sr-only">Pesquisar clientes</span>
+                                <input id="clientSearch" type="search" placeholder="Pesquisar por nome, CPF ou telefone">
+                            </label>
+
+                            <div id="clientTableBody" class="client-profile-list"></div>
+                            <p id="clientEmptyState" class="empty-state">Nenhum cliente encontrado.</p>
+                        </section>
+                    </div>
+                </section>
+
+                <section id="documentsSection" class="content-section">
+                    <div class="workspace-grid">
+                        <form id="documentForm" class="workspace-panel form-grid">
+                            <div class="section-heading full-width">
+                                <div>
+                                    <p class="eyebrow">Processo judicial</p>
+                                    <h3>Novo processo</h3>
+                                </div>
+                            </div>
+
+                            <label class="field">
+                                <span>Número CNJ</span>
+                                <input id="documentTitle" type="text" placeholder="0000000-00.0000.0.00.0000" required>
+                            </label>
+
+                            <label class="field">
+                                <span>Cliente relacionado</span>
+                                <select id="documentClient">
+                                    <option value="">Sem cliente vinculado</option>
+                                </select>
+                            </label>
+
+                            <label class="field">
+                                <span>Classe processual</span>
+                                <input id="processClass" type="text" placeholder="Ex.: Procedimento comum cível" required>
+                            </label>
+
+                            <label class="field">
+                                <span>Tribunal / Vara</span>
+                                <input id="processCourt" type="text" placeholder="Ex.: TJSP - 2ª Vara Cível" required>
+                            </label>
+
+                            <label class="field">
+                                <span>Fase</span>
+                                <select id="processPhase" required>
+                                    <option value="Cadastrado">Cadastrado</option>
+                                    <option value="Em andamento">Em andamento</option>
+                                    <option value="Audiência">Audiência</option>
+                                    <option value="Perícia">Perícia</option>
+                                    <option value="Sentença">Sentença</option>
+                                    <option value="Recurso">Recurso</option>
+                                    <option value="Arquivado">Arquivado</option>
+                                </select>
+                            </label>
+
+                            <label class="field full-width">
+                                <span>Peça ou arquivo do processo em PDF, JPG ou PNG</span>
+                                <input id="documentFile" type="file" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png" required>
+                            </label>
+
+                            <label class="field full-width">
+                                <span>Movimentação / observação</span>
+                                <textarea id="processMovement" rows="4" placeholder="Resumo da última movimentação, partes ou prazo relevante"></textarea>
+                            </label>
+
+                            <button class="btn btn-primary full-width" type="submit">Adicionar processo</button>
+                        </form>
+
+                        <section class="workspace-panel">
+                            <div class="section-heading">
+                                <div>
+                                    <p class="eyebrow">Processos judiciais</p>
+                                    <h3>Listagem</h3>
+                                </div>
+                            </div>
+                            <div id="documentList" class="document-list"></div>
+                            <p id="documentEmptyState" class="empty-state">Nenhum processo judicial cadastrado.</p>
+                        </section>
+                    </div>
+                </section>
+
+                <section id="financeSection" class="content-section">
+                    <div class="finance-overview">
+                        <article class="summary-card">
+                            <span>Honorários</span>
+                            <strong id="feesTotal">R$ 0,00</strong>
+                            <p>Entradas por serviços</p>
+                        </article>
+                        <article class="summary-card">
+                            <span>Custo de escritório</span>
+                            <strong id="paymentsTotal">R$ 0,00</strong>
+                            <p>Saídas operacionais</p>
+                        </article>
+                        <article class="summary-card">
+                            <span>Saldo do caixa</span>
+                            <strong id="receiptsTotal">R$ 0,00</strong>
+                            <p>Entradas menos saídas</p>
+                        </article>
+                    </div>
+
+                    <div class="workspace-grid">
+                        <form id="financeForm" class="workspace-panel form-grid">
+                            <div class="section-heading full-width">
+                                <div>
+                                    <p class="eyebrow">Lançamento</p>
+                                    <h3>Nova movimentação</h3>
+                                </div>
+                            </div>
+
+                            <label class="field">
+                                <span>Tipo de fluxo</span>
+                                <select id="financeType" required>
+                                    <option value="Entrada">Entrada</option>
+                                    <option value="Saída">Saída</option>
+                                </select>
+                            </label>
+
+                            <label class="field">
+                                <span>Categoria</span>
+                                <select id="financeCategory" required>
+                                    <option value="Honorário">Honorário</option>
+                                    <option value="Custo de escritório">Custo de escritório</option>
+                                    <option value="Custa processual">Custa processual</option>
+                                    <option value="Recebimento">Recebimento</option>
+                                    <option value="Outro">Outro</option>
+                                </select>
+                            </label>
+
+                            <label class="field">
+                                <span>Valor</span>
+                                <input id="financeAmount" type="number" min="0" step="0.01" placeholder="0,00" required>
+                            </label>
+
+                            <label class="field">
+                                <span>Data</span>
+                                <input id="financeDate" type="date" required>
+                            </label>
+
+                            <label class="field">
+                                <span>Cliente</span>
+                                <select id="financeClient">
+                                    <option value="">Sem cliente vinculado</option>
+                                </select>
+                            </label>
+
+                            <label class="field full-width">
+                                <span>Descrição</span>
+                                <input id="financeDescription" type="text" placeholder="Ex.: Entrada de contrato, custas, repasse" required>
+                            </label>
+
+                            <button class="btn btn-primary full-width" type="submit">Salvar lançamento</button>
+                        </form>
+
+                        <section class="workspace-panel">
+                            <div class="section-heading">
+                                <div>
+                                    <p class="eyebrow">Controle financeiro</p>
+                                    <h3>Movimentações</h3>
+                                </div>
+                            </div>
+
+                            <div class="table-wrap">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Tipo</th>
+                                            <th>Categoria</th>
+                                            <th>Descrição</th>
+                                            <th>Valor</th>
+                                            <th>Data</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="financeTableBody"></tbody>
+                                </table>
+                            </div>
+                            <p id="financeEmptyState" class="empty-state">Nenhuma movimentação cadastrada.</p>
+                        </section>
+                    </div>
+                </section>
+            </main>
+        </section>
+
+        <div id="confirmOverlay" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+            <div class="modal-panel">
+                <div>
+                    <p class="eyebrow">Confirmação</p>
+                    <h3 id="confirmTitle">Excluir cliente</h3>
+                    <p id="confirmText">Esta ação removerá o cliente da sua base.</p>
+                </div>
+                <div class="modal-actions">
+                    <button id="cancelDeleteButton" class="btn btn-ghost" type="button">Cancelar</button>
+                    <button id="confirmDeleteButton" class="btn btn-danger" type="button">Excluir</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="documentPreviewOverlay" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="documentPreviewTitle">
+            <div class="modal-panel preview-modal">
+                <div class="preview-header">
+                    <div>
+                        <p class="eyebrow">Visualização</p>
+                        <h3 id="documentPreviewTitle">Processo</h3>
+                        <p id="documentPreviewMeta"></p>
+                    </div>
+                    <button id="closeDocumentPreview" class="icon-button modal-close" type="button" aria-label="Fechar visualização">×</button>
+                </div>
+                <div id="documentPreviewBody" class="preview-frame"></div>
+            </div>
+        </div>
+    </div>
+    <footer>
+        versão 0.1 Beta
+    </footer>
+    <script src="app.js"></script>
+</body>
+</html>
