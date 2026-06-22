@@ -35,6 +35,7 @@ const appState = {
     lastCepLookup: "",
     clockTimer: null,
     tasks: [],
+    appState.tasks = [],
 };
 
 const elements = {};
@@ -48,6 +49,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     await loadState();
     await seedInitialData();
     await hydrateSession();
+
     showClientMode("list");
     renderAll();
     startClock();
@@ -73,7 +75,8 @@ function cacheElements() {
         dashboard: document.getElementById("dashboardSection"),
         clients: document.getElementById("clientsSection"),
         documents: document.getElementById("documentsSection"),
-        finance: document.getElementById("financeSection")
+        finance: document.getElementById("financeSection"),
+        tasks: document.getElementById("tasksSection")
     };
     elements.clientForm = document.getElementById("clientForm");
     elements.clientFormTitle = document.getElementById("clientFormTitle");
@@ -570,7 +573,8 @@ function setActiveView(viewName) {
         dashboard: "Dashboard",
         clients: "Clientes",
         documents: "Processos",
-        finance: "Financeiro"
+        finance: "Financeiro",
+        tasks: "Tarefas"
     };
 
     appState.currentView = viewName;

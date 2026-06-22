@@ -1096,3 +1096,27 @@ td {
         height: 54vh;
     }
 }
+.task-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 0 8px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.task-pill.low {
+  color: var(--color-success);
+  background: rgba(2, 122, 72, 0.1);
+}
+
+.task-pill.medium {
+  color: #b54708;
+  background: rgba(245, 158, 11, 0.12);
+}
+
+.task-pill.high {
+  color: var(--color-danger);
+  background: rgba(180, 35, 24, 0.1);
+}

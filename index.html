@@ -331,6 +331,51 @@
                     </div>
                 </section>
 
+                                         <!-- Seção de Tarefas -->
+                                    <section id="tasksSection" class="content-section">
+                                    <div class="workspace-panel">
+                                        <div class="section-heading">
+                                        <h3>Tarefas</h3>
+                                        </div>
+
+                                        <!-- Formulário de cadastro de tarefas -->
+                                        <form id="taskForm" class="form-grid">
+                                        <div class="field">
+                                            <span>Título</span>
+                                            <input id="taskTitle" type="text" required />
+                                        </div>
+                                        <div class="field">
+                                            <span>Responsável</span>
+                                            <input id="taskResponsible" type="text" />
+                                        </div>
+                                        <div class="field">
+                                            <span>Prioridade</span>
+                                            <select id="taskPriority">
+                                            <option value="Baixa">Baixa</option>
+                                            <option value="Média">Média</option>
+                                            <option value="Alta">Alta</option>
+                                            </select>
+                                        </div>
+                                        <div class="field">
+                                            <span>Prazo</span>
+                                            <input id="taskDueDate" type="date" />
+                                        </div>
+                                        <div class="field full-width">
+                                            <span>Descrição</span>
+                                            <textarea id="taskDescription"></textarea>
+                                        </div>
+                                        <div class="form-actions full-width">
+                                            <button type="submit" class="btn btn-primary">Salvar Tarefa</button>
+                                        </div>
+                                        </form>
+
+                                        <!-- Lista de tarefas -->
+                                        <div id="taskList" class="compact-list"></div>
+                                        <p id="taskEmptyState" class="empty-state">Nenhuma tarefa cadastrada.</p>
+                                    </div>
+                                    </section>
+
+
                 <section id="documentsSection" class="content-section">
                     <div class="workspace-grid">
                         <form id="documentForm" class="workspace-panel form-grid">
@@ -504,73 +549,49 @@
             </main>
         </section>
         
-       <section id="tasksSection" class="content-section">
-            <div class="workspace-grid">
-                <!-- Formulário de tarefas -->
-                <form id="taskForm" class="workspace-panel form-grid">
-                    <div class="section-heading full-width">
-                        <div>
-                            <p class="eyebrow">Gestão interna</p>
-                            <h3>Nova tarefa</h3>
-                        </div>
-                    </div>
+    <!-- Seção de Tarefas -->
+<section id="tasksSection" class="content-section">
+  <div class="workspace-panel">
+    <div class="section-heading">
+      <h3>Tarefas</h3>
+    </div>
 
-                    <label class="field">
-                        <span>Solicitante</span>
-                        <input id="taskRequester" type="text" required>
-                    </label>
+    <!-- Formulário de cadastro de tarefas -->
+    <form id="taskForm" class="form-grid">
+      <div class="field">
+        <span>Título</span>
+        <input id="taskTitle" type="text" required />
+      </div>
+      <div class="field">
+        <span>Responsável</span>
+        <input id="taskResponsible" type="text" />
+      </div>
+      <div class="field">
+        <span>Prioridade</span>
+        <select id="taskPriority">
+          <option value="Baixa">Baixa</option>
+          <option value="Média">Média</option>
+          <option value="Alta">Alta</option>
+        </select>
+      </div>
+      <div class="field">
+        <span>Prazo</span>
+        <input id="taskDueDate" type="date" />
+      </div>
+      <div class="field full-width">
+        <span>Descrição</span>
+        <textarea id="taskDescription"></textarea>
+      </div>
+      <div class="form-actions full-width">
+        <button type="submit" class="btn btn-primary">Salvar Tarefa</button>
+      </div>
+    </form>
 
-                    <label class="field">
-                        <span>Responsável</span>
-                        <input id="taskResponsible" type="text" required>
-                    </label>
-
-                    <label class="field">
-                        <span>Cliente</span>
-                        <select id="taskClient">
-                            <option value="">Selecione um cliente</option>
-                        </select>
-                    </label>
-
-                    <label class="field">
-                        <span>Status</span>
-                        <select id="taskStatus">
-                            <option value="Aberta">Aberta</option>
-                            <option value="Pendente">Pendente</option>
-                            <option value="Concluída">Concluída</option>
-                        </select>
-                    </label>
-
-                    <label class="field">
-                        <span>Título</span>
-                        <input id="taskTitle" type="text" required>
-                    </label>
-
-                    <label class="field">
-                        <span>Prazo</span>
-                        <input id="taskDueDate" type="date">
-                    </label>
-
-                    <label class="field full-width">
-                        <span>Descrição da tarefa</span>
-                        <textarea id="taskDescription" rows="4"></textarea>
-                    </label>
-
-                    <button class="btn btn-primary full-width" type="submit">Salvar tarefa</button>
-                </form>
-
-                <!-- Lista de tarefas -->
-                <section class="workspace-panel">
-                    <div class="section-heading">
-                        <div>
-                            <p class="eyebrow">Painel</p>
-                            <h3>Tarefas cadastradas</h3>
-                        </div>
-                    </div>
-                    <div id="taskList"></div>
-                </section>
-            </div>
-        </section>
+    <!-- Lista de tarefas -->
+    <div id="taskList" class="compact-list"></div>
+    <p id="taskEmptyState" class="empty-state">Nenhuma tarefa cadastrada.</p>
+  </div>
+</section>
 
         <!-- Modal de confirmação -->
         <div id="confirmOverlay" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
@@ -601,9 +622,11 @@
                 <div id="documentPreviewBody" class="preview-frame"></div>
             </div>
         </div>
-    </main>
+        
+    
+    
     <footer>
-        versão 0.15.0 Beta
+        versão 0.15.2 Beta
     </footer>
     <script src="app.js"></script>
 </body>
