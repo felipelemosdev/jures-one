@@ -71,6 +71,10 @@
                         <span class="nav-icon" aria-hidden="true">R$</span>
                         Financeiro
                     </button>
+                    <button class="nav-link" type="button" data-view="agenda">
+                        <span class="nav-icon" aria-hidden="true">◷</span>
+                        Agenda
+                    </button>
                     <button class="nav-link" type="button" data-view="tasks">
                      <span class="nav-icon">✓</span>
                      Tarefas
@@ -96,93 +100,100 @@
                 </header>
 
                 <section id="dashboardSection" class="content-section active-section">
-                    <div class="summary-grid dashboard-summary">
-                        <article class="summary-card">
-                            <span>Calendário</span>
-                            <strong id="calendarToday">Hoje</strong>
-                            <p id="calendarNextEvent">Nenhum evento para hoje.</p>
-                        </article>
-                        <article class="summary-card">
-                            <span>Eventos</span>
-                            <strong id="eventCount">0</strong>
-                            <p id="eventAlertCount">Nenhum alerta ativo.</p>
-                        </article>
+                    <!-- Botão imprimir dashboard -->
+                    <div class="dash-topbar">
+                        <button class="btn btn-ghost btn-print" type="button" onclick="printSection('dashboardSection', 'Dashboard')">🖨 Imprimir Dashboard</button>
                     </div>
 
-                    <div class="dashboard-grid">
-                        <section class="workspace-panel">
+                    <!-- Dashboard em 3 colunas -->
+                    <div class="dashboard-3col">
+
+                        <!-- COLUNA 1: Calendário -->
+                        <section class="workspace-panel dash-col">
+                            <div class="section-heading">
+                                <div>
+                                    <p class="eyebrow">Calendário</p>
+                                    <h3 id="calendarToday">Hoje</h3>
+                                </div>
+                            </div>
+                            <div id="dashCalendarWidget" class="calendar-widget"></div>
+                            <div class="dash-stats-mini">
+                                <div class="dash-stat-item">
+                                    <span class="dash-stat-label">Próximo evento</span>
+                                    <p id="calendarNextEvent" class="dash-stat-value">Nenhum evento.</p>
+                                </div>
+                                <div class="dash-stat-item">
+                                    <span class="dash-stat-label">Total de eventos</span>
+                                    <strong id="eventCount" class="dash-stat-big">0</strong>
+                                </div>
+                                <div class="dash-stat-item">
+                                    <span class="dash-stat-label">Alertas ativos</span>
+                                    <p id="eventAlertCount" class="dash-stat-value">Nenhum alerta.</p>
+                                </div>
+                                <div class="dash-stat-item">
+                                    <span class="dash-stat-label">Tarefas em aberto</span>
+                                    <strong id="taskOpenCount" class="dash-stat-big">0</strong>
+                                </div>
+                                <div class="dash-stat-item">
+                                    <p id="taskOpenText" class="dash-stat-value">Nenhuma tarefa em aberto.</p>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- COLUNA 2: Painel de Tarefas -->
+                        <section class="workspace-panel dash-col">
+                            <div class="section-heading">
+                                <div>
+                                    <p class="eyebrow">Gestão de tarefas</p>
+                                    <h3>Painel de tarefas</h3>
+                                </div>
+                            </div>
+                            <div class="task-status-columns-vert">
+                                <div class="task-col-mini">
+                                    <div class="task-column-header task-col-overdue">
+                                        <span>Atrasadas</span>
+                                        <span id="dashTaskOverdueCount" class="task-col-count">0</span>
+                                    </div>
+                                    <div id="dashTaskOverdueList" class="task-column-list"></div>
+                                </div>
+                                <div class="task-col-mini">
+                                    <div class="task-column-header task-col-today">
+                                        <span>Vencem hoje</span>
+                                        <span id="dashTaskTodayCount" class="task-col-count">0</span>
+                                    </div>
+                                    <div id="dashTaskTodayList" class="task-column-list"></div>
+                                </div>
+                                <div class="task-col-mini">
+                                    <div class="task-column-header task-col-upcoming">
+                                        <span>Próximas</span>
+                                        <span id="dashTaskUpcomingCount" class="task-col-count">0</span>
+                                    </div>
+                                    <div id="dashTaskUpcomingList" class="task-column-list"></div>
+                                </div>
+                                <div class="task-col-mini">
+                                    <div class="task-column-header task-col-done">
+                                        <span>Concluídas</span>
+                                        <span id="dashTaskDoneCount" class="task-col-count">0</span>
+                                    </div>
+                                    <div id="dashTaskDoneList" class="task-column-list"></div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- COLUNA 3: Agenda -->
+                        <section class="workspace-panel dash-col">
                             <div class="section-heading">
                                 <div>
                                     <p class="eyebrow">Agenda</p>
-                                    <h3>Cadastrar evento</h3>
+                                    <h3>Próximos eventos</h3>
                                 </div>
+                                <button id="dashAddEventButton" class="btn btn-primary" type="button">+ Novo</button>
                             </div>
-
-                            <form id="eventForm" class="form-grid">
-                                <label class="field">
-                                    <span>Tipo de evento</span>
-                                    <select id="eventType" required>
-                                        <option value="Avaliação social">Avaliação social</option>
-                                        <option value="Perícia médica">Perícia médica</option>
-                                        <option value="Perícia judicial">Perícia judicial</option>
-                                        <option value="Reunião">Reunião</option>
-                                        <option value="Agendamento">Agendamento</option>
-                                        <option value="Outros">Outros</option>
-                                    </select>
-                                </label>
-
-                                <label class="field">
-                                    <span>Data</span>
-                                    <input id="eventDate" type="date" required>
-                                </label>
-
-                                <label class="field">
-                                    <span>Horário</span>
-                                    <input id="eventTime" type="time" required>
-                                </label>
-
-                                <label class="field">
-                                    <span>Cliente</span>
-                                    <select id="eventClient">
-                                        <option value="">Sem cliente vinculado</option>
-                                    </select>
-                                </label>
-
-                                <label class="field">
-                                    <span>Alerta</span>
-                                    <select id="eventAlert" required>
-                                        <option value="No horário">No horário</option>
-                                        <option value="1 dia antes">1 dia antes</option>
-                                        <option value="3 dias antes">3 dias antes</option>
-                                        <option value="7 dias antes">7 dias antes</option>
-                                    </select>
-                                </label>
-
-                                <label class="field full-width">
-                                    <span>Obs. curta</span>
-                                    <input id="eventNotes" type="text" maxlength="90" placeholder="Resumo curto para aparecer na agenda">
-                                </label>
-
-                                <div class="form-actions full-width">
-                                    <button id="cancelEventEdit" class="btn btn-ghost hidden" type="button">Cancelar edição</button>
-                                    <button id="saveEventButton" class="btn btn-primary" type="submit">Salvar evento</button>
-                                </div>
-                            </form>
+                            <div id="dashEventList" class="compact-list">
+                                <p class="empty-state">Nenhum evento cadastrado.</p>
+                            </div>
                         </section>
 
-                        <section class="workspace-panel">
-                            <div class="section-heading">
-                                <div>
-                                    <p class="eyebrow">Eventos</p>
-                                    <h3>Agenda cadastrada</h3>
-                                </div>
-                            </div>
-                            <label class="search-field">
-                                <span class="sr-only">Pesquisar eventos</span>
-                                <input id="eventSearch" type="search" placeholder="Pesquisar por cadastramento, cliente, data ou alerta">
-                            </label>
-                            <div id="eventList" class="compact-list empty-state">Nenhum evento cadastrado.</div>
-                        </section>
                     </div>
                 </section>
 
@@ -331,51 +342,6 @@
                     </div>
                 </section>
 
-                                         <!-- Seção de Tarefas -->
-                                    <section id="tasksSection" class="content-section">
-                                    <div class="workspace-panel">
-                                        <div class="section-heading">
-                                        <h3>Tarefas</h3>
-                                        </div>
-
-                                        <!-- Formulário de cadastro de tarefas -->
-                                        <form id="taskForm" class="form-grid">
-                                        <div class="field">
-                                            <span>Título</span>
-                                            <input id="taskTitle" type="text" required />
-                                        </div>
-                                        <div class="field">
-                                            <span>Responsável</span>
-                                            <input id="taskResponsible" type="text" />
-                                        </div>
-                                        <div class="field">
-                                            <span>Prioridade</span>
-                                            <select id="taskPriority">
-                                            <option value="Baixa">Baixa</option>
-                                            <option value="Média">Média</option>
-                                            <option value="Alta">Alta</option>
-                                            </select>
-                                        </div>
-                                        <div class="field">
-                                            <span>Prazo</span>
-                                            <input id="taskDueDate" type="date" />
-                                        </div>
-                                        <div class="field full-width">
-                                            <span>Descrição</span>
-                                            <textarea id="taskDescription"></textarea>
-                                        </div>
-                                        <div class="form-actions full-width">
-                                            <button type="submit" class="btn btn-primary">Salvar Tarefa</button>
-                                        </div>
-                                        </form>
-
-                                        <!-- Lista de tarefas -->
-                                        <div id="taskList" class="compact-list"></div>
-                                        <p id="taskEmptyState" class="empty-state">Nenhuma tarefa cadastrada.</p>
-                                    </div>
-                                    </section>
-
-
                 <section id="documentsSection" class="content-section">
                     <div class="workspace-grid">
                         <form id="documentForm" class="workspace-panel form-grid">
@@ -448,6 +414,9 @@
                 </section>
 
                 <section id="financeSection" class="content-section">
+                    <div class="dash-topbar">
+                        <button class="btn btn-ghost btn-print" type="button" onclick="printSection('financeSection', 'Financeiro')">🖨 Imprimir Financeiro</button>
+                    </div>
                     <div class="finance-overview">
                         <article class="summary-card">
                             <span>Honorários</span>
@@ -546,54 +515,206 @@
                         </section>
                     </div>
                 </section>
+
+                <!-- Seção Agenda (CRUD completo) -->
+                <section id="agendaSection" class="content-section">
+                    <div class="dash-topbar">
+                        <button class="btn btn-ghost btn-print" type="button" onclick="printSection('agendaSection', 'Agenda')">🖨 Imprimir Agenda</button>
+                    </div>
+                    <div class="workspace-grid">
+                        <section class="workspace-panel">
+                            <div class="section-heading">
+                                <div>
+                                    <p class="eyebrow">Agenda</p>
+                                    <h3 id="agendaFormTitle">Novo evento</h3>
+                                </div>
+                            </div>
+
+                            <form id="eventForm" class="form-grid">
+                                <label class="field">
+                                    <span>Tipo de evento</span>
+                                    <select id="eventType" required>
+                                        <option value="Avaliação social">Avaliação social</option>
+                                        <option value="Perícia médica">Perícia médica</option>
+                                        <option value="Perícia judicial">Perícia judicial</option>
+                                        <option value="Reunião">Reunião</option>
+                                        <option value="Agendamento">Agendamento</option>
+                                        <option value="Outros">Outros</option>
+                                    </select>
+                                </label>
+
+                                <label class="field">
+                                    <span>Data</span>
+                                    <input id="eventDate" type="date" required>
+                                </label>
+
+                                <label class="field">
+                                    <span>Horário</span>
+                                    <input id="eventTime" type="time" required>
+                                </label>
+
+                                <label class="field">
+                                    <span>Cliente</span>
+                                    <select id="eventClient">
+                                        <option value="">Sem cliente vinculado</option>
+                                    </select>
+                                </label>
+
+                                <label class="field">
+                                    <span>Alerta</span>
+                                    <select id="eventAlert" required>
+                                        <option value="No horário">No horário</option>
+                                        <option value="1 dia antes">1 dia antes</option>
+                                        <option value="3 dias antes">3 dias antes</option>
+                                        <option value="7 dias antes">7 dias antes</option>
+                                    </select>
+                                </label>
+
+                                <label class="field full-width">
+                                    <span>Obs. curta</span>
+                                    <input id="eventNotes" type="text" maxlength="90" placeholder="Resumo curto para aparecer na agenda">
+                                </label>
+
+                                <div class="form-actions full-width">
+                                    <button id="cancelEventEdit" class="btn btn-ghost hidden" type="button">Cancelar edição</button>
+                                    <button id="saveEventButton" class="btn btn-primary" type="submit">Salvar evento</button>
+                                </div>
+                            </form>
+                        </section>
+
+                        <section class="workspace-panel">
+                            <div class="section-heading">
+                                <div>
+                                    <p class="eyebrow">Eventos</p>
+                                    <h3>Agenda cadastrada</h3>
+                                </div>
+                            </div>
+                            <label class="search-field">
+                                <span class="sr-only">Pesquisar eventos</span>
+                                <input id="eventSearch" type="search" placeholder="Pesquisar por data, cliente ou tipo">
+                            </label>
+                            <div id="eventList" class="compact-list empty-state">Nenhum evento cadastrado.</div>
+                        </section>
+                    </div>
+                </section>
+
+                <section id="tasksSection" class="content-section">
+                    <div class="workspace-grid">
+                        <form id="taskForm" class="workspace-panel form-grid">
+                            <div class="section-heading full-width">
+                                <div>
+                                    <p class="eyebrow">Tarefas</p>
+                                    <h3>Nova tarefa</h3>
+                                </div>
+                            </div>
+
+                            <label class="field">
+                                <span>Título</span>
+                                <input id="taskTitle" type="text" placeholder="Ex.: Protocolar petição" required>
+                            </label>
+
+                            <label class="field">
+                                <span>Responsável</span>
+                                <input id="taskResponsible" type="text" placeholder="Nome do responsável">
+                            </label>
+
+                            <label class="field">
+                                <span>Prioridade</span>
+                                <select id="taskPriority" required>
+                                    <option value="low">Baixa</option>
+                                    <option value="medium">Média</option>
+                                    <option value="high">Alta</option>
+                                </select>
+                            </label>
+
+                            <label class="field">
+                                <span>Prazo</span>
+                                <input id="taskDueDate" type="date">
+                            </label>
+
+                            <label class="field">
+                                <span>Cliente relacionado</span>
+                                <select id="taskClient">
+                                    <option value="">Sem cliente vinculado</option>
+                                </select>
+                            </label>
+
+                            <label class="field">
+                                <span>Alerta</span>
+                                <select id="taskAlert">
+                                    <option value="no_dia">No dia do prazo</option>
+                                    <option value="1_dia">1 dia antes</option>
+                                    <option value="3_dias">3 dias antes</option>
+                                    <option value="7_dias">7 dias antes</option>
+                                    <option value="sem_alerta">Sem alerta</option>
+                                </select>
+                            </label>
+
+                            <label class="field full-width">
+                                <span>Descrição</span>
+                                <textarea id="taskDescription" rows="3" placeholder="Detalhes da tarefa"></textarea>
+                            </label>
+
+                            <button class="btn btn-primary full-width" type="submit">Adicionar tarefa</button>
+                        </form>
+
+                        <section class="workspace-panel">
+                            <div class="section-heading">
+                                <div>
+                                    <p class="eyebrow">Gestão</p>
+                                    <h3>Tarefas cadastradas</h3>
+                                </div>
+                            </div>
+                            <div id="taskList" class="compact-list"></div>
+                            <p class="empty-state hidden" id="taskEmptyState">Nenhuma tarefa cadastrada.</p>
+                        </section>
+                    </div>
+
+                    <!-- Modal de resposta de tarefa -->
+                    <div id="taskReplyOverlay" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="taskReplyTitle">
+                        <div class="modal-panel task-reply-modal">
+                            <div class="preview-header">
+                                <div>
+                                    <p class="eyebrow">Resposta</p>
+                                    <h3 id="taskReplyTitle">Responder tarefa</h3>
+                                    <p id="taskReplySubtitle" style="color:var(--color-muted);font-size:0.9rem;margin:0"></p>
+                                </div>
+                                <button class="icon-button modal-close" type="button" onclick="closeTaskReply()" aria-label="Fechar">×</button>
+                            </div>
+
+                            <div class="task-reply-body">
+                                <label class="field">
+                                    <span>Responsável pela resposta</span>
+                                    <input id="replyResponsible" type="text" placeholder="Nome de quem está respondendo">
+                                </label>
+
+                                <label class="field">
+                                    <span>Texto da resposta</span>
+                                    <textarea id="replyText" rows="5" placeholder="Descreva o andamento, resultado ou observações desta tarefa..."></textarea>
+                                </label>
+
+                                <label class="field">
+                                    <span>Anexar PDF (opcional)</span>
+                                    <input id="replyPdf" type="file" accept=".pdf,application/pdf">
+                                    <small id="replyPdfName" style="color:var(--color-muted);margin-top:4px"></small>
+                                </label>
+
+                                <div id="taskReplyHistory" class="task-reply-history"></div>
+                            </div>
+
+                            <div class="modal-actions">
+                                <button class="btn btn-ghost" type="button" onclick="printTaskReply()">🖨 Imprimir resposta</button>
+                                <button class="btn btn-ghost" type="button" onclick="closeTaskReply()">Fechar</button>
+                                <button class="btn btn-primary" type="button" onclick="saveTaskReply()">Salvar resposta</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                               
             </main>
         </section>
         
-    <!-- Seção de Tarefas -->
-<section id="tasksSection" class="content-section">
-  <div class="workspace-panel">
-    <div class="section-heading">
-      <h3>Tarefas</h3>
-    </div>
-
-    <!-- Formulário de cadastro de tarefas -->
-    <form id="taskForm" class="form-grid">
-      <div class="field">
-        <span>Título</span>
-        <input id="taskTitle" type="text" required />
-      </div>
-      <div class="field">
-        <span>Responsável</span>
-        <input id="taskResponsible" type="text" />
-      </div>
-      <div class="field">
-        <span>Prioridade</span>
-        <select id="taskPriority">
-          <option value="Baixa">Baixa</option>
-          <option value="Média">Média</option>
-          <option value="Alta">Alta</option>
-        </select>
-      </div>
-      <div class="field">
-        <span>Prazo</span>
-        <input id="taskDueDate" type="date" />
-      </div>
-      <div class="field full-width">
-        <span>Descrição</span>
-        <textarea id="taskDescription"></textarea>
-      </div>
-      <div class="form-actions full-width">
-        <button type="submit" class="btn btn-primary">Salvar Tarefa</button>
-      </div>
-    </form>
-
-    <!-- Lista de tarefas -->
-    <div id="taskList" class="compact-list"></div>
-    <p id="taskEmptyState" class="empty-state">Nenhuma tarefa cadastrada.</p>
-  </div>
-</section>
-
-        <!-- Modal de confirmação -->
+          <!-- Modal de confirmação -->
         <div id="confirmOverlay" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
             <div class="modal-panel">
                 <div>
@@ -622,11 +743,9 @@
                 <div id="documentPreviewBody" class="preview-frame"></div>
             </div>
         </div>
-        
-    
-    
+    </section>
     <footer>
-        versão 0.15.2 Beta
+        versão 0.15.0 Beta
     </footer>
     <script src="app.js"></script>
 </body>

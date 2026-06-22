@@ -5,6 +5,7 @@ const STORAGE_KEYS = {
     documents: "juresone.documents",
     finance: "juresone.finance",
     events: "juresone.events",
+    tasks: "juresone.tasks",
     initialized: "juresone.initialized"
 };
 
@@ -16,6 +17,7 @@ const DATABASE_CONFIG = {
         [STORAGE_KEYS.documents]: "documents",
         [STORAGE_KEYS.finance]: "finance",
         [STORAGE_KEYS.events]: "events",
+        [STORAGE_KEYS.tasks]: "tasks",
     },
     metaStore: "meta",
     legacyMigratedKey: "legacyMigrated"
@@ -35,7 +37,7 @@ const appState = {
     lastCepLookup: "",
     clockTimer: null,
     tasks: [],
-    appState.tasks = [],
+    activeReplyTaskId: null,
 };
 
 const elements = {};
@@ -76,8 +78,11 @@ function cacheElements() {
         clients: document.getElementById("clientsSection"),
         documents: document.getElementById("documentsSection"),
         finance: document.getElementById("financeSection"),
+        agenda: document.getElementById("agendaSection"),
         tasks: document.getElementById("tasksSection")
     };
+    elements.dashAddEventButton = document.getElementById("dashAddEventButton");
+    elements.dashEventList = document.getElementById("dashEventList");
     elements.clientForm = document.getElementById("clientForm");
     elements.clientFormTitle = document.getElementById("clientFormTitle");
     elements.cancelClientEdit = document.getElementById("cancelClientEdit");
@@ -158,6 +163,27 @@ function cacheElements() {
     elements.taskPriority = document.getElementById("taskPriority");
     elements.taskDueDate = document.getElementById("taskDueDate");
     elements.taskDescription = document.getElementById("taskDescription");
+    elements.taskClient = document.getElementById("taskClient");
+    elements.taskAlert = document.getElementById("taskAlert");
+    elements.taskOpenCount = document.getElementById("taskOpenCount");
+    elements.taskOpenText = document.getElementById("taskOpenText");
+    elements.dashTaskOverdueCount = document.getElementById("dashTaskOverdueCount");
+    elements.dashTaskOverdueList = document.getElementById("dashTaskOverdueList");
+    elements.dashTaskTodayCount = document.getElementById("dashTaskTodayCount");
+    elements.dashTaskTodayList = document.getElementById("dashTaskTodayList");
+    elements.dashTaskUpcomingCount = document.getElementById("dashTaskUpcomingCount");
+    elements.dashTaskUpcomingList = document.getElementById("dashTaskUpcomingList");
+    elements.dashTaskDoneCount = document.getElementById("dashTaskDoneCount");
+    elements.dashTaskDoneList = document.getElementById("dashTaskDoneList");
+    elements.taskReplyOverlay = document.getElementById("taskReplyOverlay");
+    elements.taskReplyTitle = document.getElementById("taskReplyTitle");
+    elements.taskReplySubtitle = document.getElementById("taskReplySubtitle");
+    elements.replyResponsible = document.getElementById("replyResponsible");
+    elements.replyText = document.getElementById("replyText");
+    elements.replyPdf = document.getElementById("replyPdf");
+    elements.replyPdfName = document.getElementById("replyPdfName");
+    elements.taskReplyHistory = document.getElementById("taskReplyHistory");
+    elements.dashCalendarWidget = document.getElementById("dashCalendarWidget");
 }
 
 function bindEvents() {
@@ -180,6 +206,11 @@ function bindEvents() {
     });
     elements.clientSearch.addEventListener("input", renderClients);
     elements.clientTableBody.addEventListener("click", handleClientTableClick);
+    elements.dashAddEventButton.addEventListener("click", () => {
+        resetEventForm();
+        setActiveView("agenda");
+        elements.sidebar.classList.remove("open");
+    });
     elements.eventForm.addEventListener("submit", handleEventSubmit);
     elements.cancelEventEdit.addEventListener("click", resetEventForm);
     elements.eventSearch.addEventListener("input", renderEvents);
@@ -191,6 +222,12 @@ function bindEvents() {
     elements.financeForm.addEventListener("submit", handleFinanceSubmit);
     elements.financeTableBody.addEventListener("click", handleFinanceTableClick);
     document.addEventListener("keydown", handleGlobalKeydown);
+    elements.taskForm.addEventListener("submit", handleTaskSubmit);
+    elements.taskList.addEventListener("click", handleTaskListClick);
+    elements.replyPdf.addEventListener("change", () => {
+        const file = elements.replyPdf.files[0];
+        elements.replyPdfName.textContent = file ? `📎 ${file.name}` : "";
+    });
 
     elements.navLinks.forEach((link) => {
         link.addEventListener("click", () => {
@@ -283,6 +320,7 @@ async function loadState() {
     appState.documents = await readStorage(STORAGE_KEYS.documents, []);
     appState.finance = await readStorage(STORAGE_KEYS.finance, []);
     appState.events = await readStorage(STORAGE_KEYS.events, []);
+    appState.tasks = await readStorage(STORAGE_KEYS.tasks, []);
 }
 
 async function readStorage(key, fallback) {
@@ -574,6 +612,7 @@ function setActiveView(viewName) {
         clients: "Clientes",
         documents: "Processos",
         finance: "Financeiro",
+        agenda: "Agenda",
         tasks: "Tarefas"
     };
 
@@ -843,7 +882,7 @@ function validateClientCpf() {
 
     if (!cpf) {
         setCpfMessage("", "");
-        return false;
+        return true;
     }
 
     if (!isValidCpf(cpf)) {
@@ -1112,16 +1151,59 @@ function resetEventForm() {
     elements.eventAlert.value = "No horário";
     elements.cancelEventEdit.classList.add("hidden");
     elements.saveEventButton.textContent = "Salvar evento";
+    const titleEl = document.getElementById("agendaFormTitle");
+    if (titleEl) titleEl.textContent = "Novo evento";
 }
 
 function renderAll() {
     renderDate();
     renderSummary();
+    renderCalendarWidget();
     renderClients();
     renderClientSelects();
     renderDocuments();
     renderFinance();
     renderEvents();
+    renderDashboardEvents();
+    renderTasks();
+}
+
+function renderCalendarWidget() {
+    if (!elements.dashCalendarWidget) return;
+
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth();
+    const todayStr = todayISO();
+
+    // Event dates for highlighting
+    const eventDates = new Set(appState.events.map((e) => e.date));
+
+    const firstDay = new Date(year, month, 1).getDay(); // 0=Sun
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    const monthName = new Intl.DateTimeFormat("pt-BR", { month: "long", year: "numeric" }).format(now);
+    const dayNames = ["D", "S", "T", "Q", "Q", "S", "S"];
+
+    let html = `<div class="cal-header"><span>${monthName.charAt(0).toUpperCase() + monthName.slice(1)}</span></div>`;
+    html += '<div class="cal-grid">';
+    dayNames.forEach((d) => { html += `<div class="cal-day-name">${d}</div>`; });
+
+    // empty cells before first day
+    for (let i = 0; i < firstDay; i++) {
+        html += '<div class="cal-day empty"></div>';
+    }
+
+    for (let d = 1; d <= daysInMonth; d++) {
+        const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+        const isToday = dateStr === todayStr;
+        const hasEvent = eventDates.has(dateStr);
+        const cls = ["cal-day", isToday ? "today" : "", hasEvent && !isToday ? "has-event" : ""].filter(Boolean).join(" ");
+        html += `<div class="${cls}" title="${dateStr}">${d}</div>`;
+    }
+
+    html += '</div>';
+    elements.dashCalendarWidget.innerHTML = html;
 }
 
 function renderDate() {
@@ -1168,7 +1250,7 @@ function renderSummary() {
     const todayEvents = appState.events.filter((eventItem) => eventItem.date === today);
     const nextEvent = getSortedEvents().find((eventItem) => eventItem.date >= today);
 
-    elements.calendarToday.textContent = formatDate(today);
+    elements.calendarToday.textContent = `Hoje: ${formatDate(today)}`;
     elements.calendarNextEvent.textContent = nextEvent
         ? `${nextEvent.type} em ${formatDate(nextEvent.date)} às ${nextEvent.time}`
         : "Nenhum evento cadastrado.";
@@ -1181,6 +1263,81 @@ function renderSummary() {
     elements.feesTotal.textContent = formatCurrency(totals.fees);
     elements.paymentsTotal.textContent = formatCurrency(totals.officeCosts);
     elements.receiptsTotal.textContent = formatCurrency(totals.balance);
+
+    renderDashboardTasks();
+}
+
+function renderDashboardTasks() {
+    const today = todayISO();
+    const openTasks = appState.tasks.filter((t) => !t.done);
+
+    elements.taskOpenCount.textContent = openTasks.length;
+    elements.taskOpenText.textContent = openTasks.length
+        ? `${openTasks.length} tarefa(s) em aberto.`
+        : "Nenhuma tarefa em aberto.";
+
+    const overdue = appState.tasks.filter((t) => !t.done && t.dueDate && t.dueDate < today);
+    const todayTasks = appState.tasks.filter((t) => !t.done && t.dueDate === today);
+    const upcoming = appState.tasks.filter((t) => !t.done && t.dueDate && t.dueDate > today);
+    const done = appState.tasks.filter((t) => t.done);
+
+    const renderColumn = (list, container, countEl) => {
+        countEl.textContent = list.length;
+        container.innerHTML = "";
+        if (!list.length) {
+            container.innerHTML = '<p class="task-col-empty">Nenhuma</p>';
+            return;
+        }
+        list.forEach((task) => {
+            const client = findClient(task.clientId);
+            const priorityLabel = { low: "Baixa", medium: "Média", high: "Alta" }[task.priority] || task.priority;
+            const card = document.createElement("div");
+            card.className = `task-dash-card priority-${task.priority}`;
+            card.innerHTML = `
+                <strong>${escapeHTML(task.title)}</strong>
+                ${client ? `<span class="task-dash-client">${escapeHTML(client.name)}</span>` : ""}
+                <div class="task-dash-meta">
+                    <span class="task-pill ${task.priority}">${escapeHTML(priorityLabel)}</span>
+                    ${task.dueDate ? `<span class="task-dash-date">${formatDate(task.dueDate)}</span>` : ""}
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    };
+
+    renderColumn(overdue, elements.dashTaskOverdueList, elements.dashTaskOverdueCount);
+    renderColumn(todayTasks, elements.dashTaskTodayList, elements.dashTaskTodayCount);
+    renderColumn(upcoming, elements.dashTaskUpcomingList, elements.dashTaskUpcomingCount);
+    renderColumn(done, elements.dashTaskDoneList, elements.dashTaskDoneCount);
+}
+
+function renderDashboardEvents() {
+    if (!elements.dashEventList) return;
+    const today = todayISO();
+    const upcoming = getSortedEvents().filter((ev) => ev.date >= today).slice(0, 8);
+    elements.dashEventList.innerHTML = "";
+
+    if (!upcoming.length) {
+        elements.dashEventList.innerHTML = '<p class="empty-state">Nenhum evento próximo.</p>';
+        return;
+    }
+
+    upcoming.forEach((eventItem) => {
+        const client = findClient(eventItem.clientId);
+        const item = document.createElement("article");
+        item.className = "compact-item event-item";
+        item.innerHTML = `
+            <div>
+                <strong>${escapeHTML(eventItem.type)}</strong>
+                <span>${formatDate(eventItem.date)} às ${escapeHTML(eventItem.time)}${client ? " · " + escapeHTML(client.name) : ""}</span>
+                ${eventItem.notes ? `<small>${escapeHTML(eventItem.notes)}</small>` : ""}
+            </div>
+            <div class="event-actions">
+                <span class="status-pill">${escapeHTML(eventItem.alert)}</span>
+            </div>
+        `;
+        elements.dashEventList.appendChild(item);
+    });
 }
 
 function renderClients() {
@@ -1313,7 +1470,7 @@ function createClientAvatar(client) {
 }
 
 function renderClientSelects() {
-    const selectTargets = [elements.documentClient, elements.financeClient, elements.eventClient];
+    const selectTargets = [elements.documentClient, elements.financeClient, elements.eventClient, elements.taskClient].filter(Boolean);
 
     selectTargets.forEach((select) => {
         const selectedValue = select.value;
@@ -1563,6 +1720,8 @@ function fillEventForm(eventId) {
     elements.eventNotes.value = eventItem.notes || "";
     elements.cancelEventEdit.classList.remove("hidden");
     elements.saveEventButton.textContent = "Alterar evento";
+    const titleEl = document.getElementById("agendaFormTitle");
+    if (titleEl) titleEl.textContent = "Editar evento";
     elements.eventType.focus();
 }
 
@@ -1651,7 +1810,8 @@ async function persistAll() {
         saveStorage(STORAGE_KEYS.clients, appState.clients),
         saveStorage(STORAGE_KEYS.documents, appState.documents),
         saveStorage(STORAGE_KEYS.finance, appState.finance),
-        saveStorage(STORAGE_KEYS.events, appState.events)
+        saveStorage(STORAGE_KEYS.events, appState.events),
+        saveStorage(STORAGE_KEYS.tasks, appState.tasks)
     ]);
 }
 
@@ -1775,6 +1935,260 @@ function createTypePill(type) {
     const flow = getFinanceFlow({ type });
     const className = flow === "Saída" ? "out" : "";
     return `<span class="type-pill ${className}">${escapeHTML(flow)}</span>`;
+}
+
+async function handleTaskSubmit(event) {
+    event.preventDefault();
+
+    appState.tasks.unshift({
+        id: createId(),
+        title: elements.taskTitle.value.trim(),
+        responsible: elements.taskResponsible.value.trim(),
+        priority: elements.taskPriority.value,
+        dueDate: elements.taskDueDate.value,
+        clientId: elements.taskClient.value,
+        alert: elements.taskAlert.value,
+        description: elements.taskDescription.value.trim(),
+        done: false,
+        createdAt: new Date().toISOString(),
+        replies: []
+    });
+
+    await saveStorage(STORAGE_KEYS.tasks, appState.tasks);
+    elements.taskForm.reset();
+    elements.taskAlert.value = "no_dia";
+    renderAll();
+}
+
+function renderTasks() {
+    const taskEmptyState = document.getElementById("taskEmptyState");
+    elements.taskList.innerHTML = "";
+
+    if (!appState.tasks.length) {
+        taskEmptyState.classList.remove("hidden");
+        return;
+    }
+
+    taskEmptyState.classList.add("hidden");
+
+    appState.tasks.forEach((task) => {
+        const priorityLabel = { low: "Baixa", medium: "Média", high: "Alta" }[task.priority] || task.priority;
+        const client = findClient(task.clientId);
+        const alertLabel = { no_dia: "Alerta: no dia", "1_dia": "Alerta: 1 dia antes", "3_dias": "Alerta: 3 dias antes", "7_dias": "Alerta: 7 dias antes", sem_alerta: "" }[task.alert] || "";
+        const metaParts = [
+            task.responsible ? task.responsible : null,
+            client ? client.name : null,
+            task.dueDate ? "Prazo: " + formatDate(task.dueDate) : "Sem prazo",
+            alertLabel || null
+        ].filter(Boolean);
+        const item = document.createElement("article");
+        item.className = "compact-item task-item";
+        item.innerHTML = `
+            <div>
+                <strong style="${task.done ? "text-decoration:line-through;opacity:0.5" : ""}">${escapeHTML(task.title)}</strong>
+                <span>${escapeHTML(metaParts.join(" · "))}</span>
+                ${task.description ? `<small>${escapeHTML(task.description)}</small>` : ""}
+            </div>
+            <div class="event-actions">
+                <span class="task-pill ${task.priority}">${escapeHTML(priorityLabel)}</span>
+                <button class="action-button reply" type="button" data-action="reply-task" data-id="${task.id}">💬 Responder${task.replies && task.replies.length ? ` (${task.replies.length})` : ""}</button>
+                <button class="action-button" type="button" data-action="toggle-task" data-id="${task.id}">${task.done ? "Reabrir" : "Concluir"}</button>
+                <button class="action-button danger" type="button" data-action="delete-task" data-id="${task.id}">Excluir</button>
+            </div>
+        `;
+        elements.taskList.appendChild(item);
+    });
+}
+
+function handleTaskListClick(event) {
+    const button = event.target.closest("button[data-action]");
+    if (!button) {
+        return;
+    }
+
+    const taskId = button.dataset.id;
+
+    if (button.dataset.action === "toggle-task") {
+        appState.tasks = appState.tasks.map((t) => t.id === taskId ? { ...t, done: !t.done } : t);
+        saveStorage(STORAGE_KEYS.tasks, appState.tasks);
+        renderTasks();
+        renderDashboardTasks();
+    }
+
+    if (button.dataset.action === "delete-task") {
+        appState.tasks = appState.tasks.filter((t) => t.id !== taskId);
+        saveStorage(STORAGE_KEYS.tasks, appState.tasks);
+        renderTasks();
+        renderDashboardTasks();
+    }
+
+    if (button.dataset.action === "reply-task") {
+        openTaskReply(taskId);
+    }
+}
+
+function openTaskReply(taskId) {
+    const task = appState.tasks.find((t) => t.id === taskId);
+    if (!task) return;
+
+    appState.activeReplyTaskId = taskId;
+    elements.taskReplyTitle.textContent = escapeHTML(task.title);
+    elements.taskReplySubtitle.textContent = task.responsible ? `Responsável original: ${task.responsible}` : "";
+    elements.replyResponsible.value = "";
+    elements.replyText.value = "";
+    elements.replyPdf.value = "";
+    elements.replyPdfName.textContent = "";
+
+    renderReplyHistory(task);
+    elements.taskReplyOverlay.classList.remove("hidden");
+    elements.replyResponsible.focus();
+}
+
+function closeTaskReply() {
+    appState.activeReplyTaskId = null;
+    elements.taskReplyOverlay.classList.add("hidden");
+}
+
+function renderReplyHistory(task) {
+    const replies = task.replies || [];
+    if (!replies.length) {
+        elements.taskReplyHistory.innerHTML = '<p style="color:var(--color-muted);font-size:0.85rem">Nenhuma resposta ainda.</p>';
+        return;
+    }
+
+    elements.taskReplyHistory.innerHTML = replies.map((r) => `
+        <div class="reply-entry">
+            <div class="reply-entry-header">
+                <span class="reply-entry-author">👤 ${escapeHTML(r.author || "Anônimo")}</span>
+                <span class="reply-entry-date">${new Date(r.createdAt).toLocaleString("pt-BR")}</span>
+            </div>
+            <p class="reply-entry-text">${escapeHTML(r.text)}</p>
+            ${r.pdfName ? `<a class="reply-entry-pdf" href="${r.pdfData}" download="${escapeHTML(r.pdfName)}">📎 ${escapeHTML(r.pdfName)}</a>` : ""}
+        </div>
+    `).join("");
+}
+
+async function saveTaskReply() {
+    const taskId = appState.activeReplyTaskId;
+    if (!taskId) return;
+
+    const text = elements.replyText.value.trim();
+    if (!text) {
+        elements.replyText.focus();
+        return;
+    }
+
+    const pdfFile = elements.replyPdf.files[0];
+    let pdfData = "";
+    let pdfName = "";
+
+    if (pdfFile) {
+        if (!pdfFile.type.includes("pdf")) {
+            alert("Por favor, anexe um arquivo PDF.");
+            return;
+        }
+        try {
+            pdfData = await fileToDataURL(pdfFile);
+            pdfName = pdfFile.name;
+        } catch {
+            alert("Não foi possível ler o PDF.");
+            return;
+        }
+    }
+
+    const reply = {
+        id: createId(),
+        author: elements.replyResponsible.value.trim() || "Anônimo",
+        text,
+        pdfData,
+        pdfName,
+        createdAt: new Date().toISOString()
+    };
+
+    appState.tasks = appState.tasks.map((t) => {
+        if (t.id !== taskId) return t;
+        return { ...t, replies: [...(t.replies || []), reply] };
+    });
+
+    await saveStorage(STORAGE_KEYS.tasks, appState.tasks);
+
+    elements.replyText.value = "";
+    elements.replyResponsible.value = "";
+    elements.replyPdf.value = "";
+    elements.replyPdfName.textContent = "";
+
+    const updatedTask = appState.tasks.find((t) => t.id === taskId);
+    renderReplyHistory(updatedTask);
+    renderTasks();
+}
+
+function printTaskReply() {
+    const taskId = appState.activeReplyTaskId;
+    const task = appState.tasks.find((t) => t.id === taskId);
+    if (!task) return;
+
+    const replies = (task.replies || []).map((r) => `
+        <div style="border:1px solid #ddd;border-left:3px solid #d4af37;padding:12px;border-radius:6px;margin-bottom:12px;background:#fafafa">
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+                <strong>${escapeHTML(r.author || "Anônimo")}</strong>
+                <span style="color:#666;font-size:0.85rem">${new Date(r.createdAt).toLocaleString("pt-BR")}</span>
+            </div>
+            <p style="margin:0;white-space:pre-wrap">${escapeHTML(r.text)}</p>
+            ${r.pdfName ? `<p style="margin:6px 0 0;font-size:0.82rem;color:#666">📎 Anexo: ${escapeHTML(r.pdfName)}</p>` : ""}
+        </div>
+    `).join("");
+
+    const win = window.open("", "_blank");
+    win.document.write(`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">
+        <title>Tarefa: ${escapeHTML(task.title)}</title>
+        <style>body{font-family:Arial,sans-serif;padding:30px;color:#182033}h1{color:#10203a}h2{color:#667085;font-size:1rem;font-weight:600}hr{border:none;border-top:1px solid #ddd;margin:20px 0}</style>
+        </head><body>
+        <h1>${escapeHTML(task.title)}</h1>
+        <h2>Responsável original: ${escapeHTML(task.responsible || "—")} · Prazo: ${task.dueDate ? formatDate(task.dueDate) : "—"}</h2>
+        ${task.description ? `<p>${escapeHTML(task.description)}</p>` : ""}
+        <hr>
+        <h2>Respostas (${(task.replies || []).length})</h2>
+        ${replies || '<p style="color:#667085">Nenhuma resposta.</p>'}
+        </body></html>`);
+    win.document.close();
+    win.focus();
+    win.print();
+}
+
+function printSection(sectionId, title) {
+    const section = document.getElementById(sectionId);
+    if (!section) return;
+
+    const win = window.open("", "_blank");
+    win.document.write(`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">
+        <title>${title} — Jures One</title>
+        <style>
+            body{font-family:Arial,sans-serif;padding:30px;color:#182033}
+            h1{color:#10203a;margin-bottom:6px}
+            .dash-topbar,.btn-print,.modal-overlay,.event-actions,.action-button,.btn{display:none!important}
+            table{width:100%;border-collapse:collapse;font-size:0.9rem}
+            th,td{border:1px solid #ddd;padding:8px 10px;text-align:left}
+            th{background:#f0f0f5;font-weight:700}
+            .workspace-panel,.summary-card{border:1px solid #ddd;border-radius:6px;padding:16px;margin-bottom:16px}
+            .compact-item{padding:8px 0;border-bottom:1px solid #eee}
+            .task-column-header{padding:6px 10px;border-radius:4px;font-size:0.82rem;font-weight:700;margin-bottom:6px}
+            .task-col-overdue{background:rgba(180,35,24,.1);color:#b42318}
+            .task-col-today{background:rgba(245,158,11,.13);color:#b54708}
+            .task-col-upcoming{background:rgba(2,122,72,.1);color:#027a48}
+            .task-col-done{background:rgba(71,84,103,.1);color:#475467}
+            .task-dash-card{padding:8px 10px;border:1px solid #ddd;border-radius:4px;margin-bottom:6px}
+            .eyebrow{font-size:0.75rem;font-weight:800;text-transform:uppercase;color:#d4af37;margin:0 0 4px}
+            .section-heading{margin-bottom:14px}
+            .type-pill,.status-pill,.task-pill,.document-badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:0.78rem}
+        </style>
+        </head><body>
+        <h1>${title} — Jures One</h1>
+        <p style="color:#667085;font-size:0.85rem;margin-bottom:20px">Impresso em ${new Date().toLocaleString("pt-BR")}</p>
+        ${section.innerHTML}
+        </body></html>`);
+    win.document.close();
+    win.focus();
+    win.print();
 }
 
 function escapeHTML(value) {

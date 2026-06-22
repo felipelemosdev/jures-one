@@ -414,7 +414,7 @@ textarea:focus {
 }
 
 .dashboard-summary {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .finance-overview {
@@ -452,7 +452,6 @@ textarea:focus {
     color: var(--color-muted);
 }
 
-.dashboard-grid,
 .workspace-grid {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
@@ -969,7 +968,6 @@ td {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
-    .dashboard-grid,
     .workspace-grid {
         grid-template-columns: 1fr;
     }
@@ -1119,4 +1117,419 @@ td {
 .task-pill.high {
   color: var(--color-danger);
   background: rgba(180, 35, 24, 0.1);
+}
+
+/* Dashboard task panel */
+.dashboard-task-panel {
+    grid-column: 1 / -1;
+}
+
+.task-status-columns {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.task-column {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-height: 180px;
+}
+
+.task-column-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    border-radius: var(--radius);
+    font-size: 0.82rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+.task-col-overdue {
+    background: rgba(180, 35, 24, 0.1);
+    color: var(--color-danger);
+}
+
+.task-col-today {
+    background: rgba(245, 158, 11, 0.13);
+    color: #b54708;
+}
+
+.task-col-upcoming {
+    background: rgba(2, 122, 72, 0.1);
+    color: var(--color-success);
+}
+
+.task-col-done {
+    background: rgba(71, 84, 103, 0.1);
+    color: #475467;
+}
+
+.task-col-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    background: rgba(16, 32, 58, 0.12);
+    font-size: 0.75rem;
+}
+
+.task-column-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+}
+
+.task-col-empty {
+    margin: 8px 0 0;
+    color: var(--color-muted);
+    font-size: 0.82rem;
+}
+
+.task-dash-card {
+    padding: 10px 12px;
+    border: 1px solid var(--color-border);
+    border-left-width: 3px;
+    border-radius: var(--radius);
+    background: var(--color-white);
+}
+
+.task-dash-card.priority-high {
+    border-left-color: var(--color-danger);
+}
+
+.task-dash-card.priority-medium {
+    border-left-color: #f59e0b;
+}
+
+.task-dash-card.priority-low {
+    border-left-color: var(--color-success);
+}
+
+.task-dash-card strong {
+    display: block;
+    color: var(--color-navy);
+    font-size: 0.88rem;
+    margin-bottom: 4px;
+}
+
+.task-dash-client {
+    display: block;
+    color: var(--color-muted);
+    font-size: 0.78rem;
+    margin-bottom: 6px;
+}
+
+.task-dash-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.task-dash-date {
+    color: var(--color-muted);
+    font-size: 0.75rem;
+    margin-left: auto;
+}
+
+/* ===========================
+   DASHBOARD 3 COLUNAS
+   =========================== */
+.dash-topbar {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 12px;
+}
+
+.btn-print {
+    gap: 6px;
+    font-size: 0.85rem;
+    padding: 0 14px;
+}
+
+.dashboard-3col {
+    display: grid;
+    grid-template-columns: 260px 1fr 280px;
+    gap: 18px;
+    align-items: start;
+    margin-top: 4px;
+}
+
+.dash-col {
+    padding: 20px;
+    min-height: 400px;
+}
+
+/* Calendário widget mini */
+.calendar-widget {
+    margin-bottom: 14px;
+}
+
+.cal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-weight: 800;
+    font-size: 0.88rem;
+    color: var(--color-navy);
+}
+
+.cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+    font-size: 0.75rem;
+    text-align: center;
+}
+
+.cal-day-name {
+    color: var(--color-muted);
+    font-weight: 700;
+    padding: 3px 0;
+}
+
+.cal-day {
+    padding: 4px 2px;
+    border-radius: 4px;
+    cursor: default;
+    color: var(--color-text);
+}
+
+.cal-day.today {
+    background: var(--color-gold);
+    color: var(--color-navy);
+    font-weight: 800;
+    border-radius: 50%;
+}
+
+.cal-day.has-event {
+    background: rgba(16, 32, 58, 0.08);
+    font-weight: 700;
+}
+
+.cal-day.empty {
+    color: transparent;
+}
+
+.dash-stats-mini {
+    display: grid;
+    gap: 10px;
+    border-top: 1px solid var(--color-border);
+    padding-top: 12px;
+    margin-top: 4px;
+}
+
+.dash-stat-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.dash-stat-label {
+    color: var(--color-muted);
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.dash-stat-big {
+    font-size: 1.5rem;
+    color: var(--color-navy);
+    font-weight: 800;
+}
+
+.dash-stat-value {
+    margin: 0;
+    color: var(--color-text);
+    font-size: 0.84rem;
+}
+
+/* Colunas de status verticais (dentro de painel) */
+.task-status-columns-vert {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.task-col-mini {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+/* ===========================
+   TASK REPLY MODAL
+   =========================== */
+.task-reply-modal {
+    width: min(100%, 640px);
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.task-reply-body {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 4px 0;
+    margin: 14px 0;
+}
+
+.task-reply-history {
+    border-top: 1px solid var(--color-border);
+    padding-top: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.reply-entry {
+    padding: 12px 14px;
+    border: 1px solid var(--color-border);
+    border-left: 3px solid var(--color-gold);
+    border-radius: var(--radius);
+    background: var(--color-surface);
+}
+
+.reply-entry-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.reply-entry-author {
+    font-weight: 800;
+    font-size: 0.88rem;
+    color: var(--color-navy);
+}
+
+.reply-entry-date {
+    color: var(--color-muted);
+    font-size: 0.78rem;
+}
+
+.reply-entry-text {
+    margin: 0;
+    color: var(--color-text);
+    font-size: 0.88rem;
+    line-height: 1.5;
+    white-space: pre-wrap;
+}
+
+.reply-entry-pdf {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+    padding: 4px 10px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    background: var(--color-white);
+    color: var(--color-navy);
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.reply-entry-pdf:hover {
+    background: var(--color-surface);
+}
+
+/* Botão responder na lista de tarefas */
+.action-button.reply {
+    border-color: rgba(16, 32, 58, 0.2);
+    color: var(--color-navy);
+    background: rgba(212, 175, 55, 0.08);
+}
+
+/* ===========================
+   PRINT STYLES
+   =========================== */
+@media print {
+    .sidebar,
+    .topbar,
+    .dash-topbar,
+    .btn-print,
+    .login-view,
+    .task-reply-modal .modal-actions,
+    nav,
+    footer {
+        display: none !important;
+    }
+
+    .system-view {
+        display: block !important;
+    }
+
+    .main-area {
+        padding: 0 !important;
+    }
+
+    .content-section {
+        display: none !important;
+    }
+
+    .content-section.print-target {
+        display: block !important;
+    }
+
+    .dashboard-3col {
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr) !important;
+    }
+
+    body {
+        background: white !important;
+    }
+
+    .workspace-panel, .summary-card {
+        box-shadow: none !important;
+        border: 1px solid #ccc !important;
+    }
+}
+
+/* ===========================
+   RESPONSIVO
+   =========================== */
+@media (max-width: 1100px) {
+    .dashboard-3col {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .dashboard-3col .dash-col:last-child {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 820px) {
+    .dashboard-3col {
+        grid-template-columns: 1fr;
+    }
+
+    .task-status-columns {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 480px) {
+    .task-status-columns {
+        grid-template-columns: 1fr;
+    }
 }
